@@ -19,21 +19,32 @@ const (
 func main() {
 	// IP multicast requires interface name.
 	var itfName string
-	flag.StringVar(&itfName, "itfname", "eth0", "the name of the interface")
+	flag.StringVar(&itfName, "itfname", "", "the name of the interface")
 	flag.Parse()
 
-	udpMulticaster := createUDPMulticaster()
-	ipMulticaster := createIPMulticaster(itfName)
-	defer ipMulticaster.Close()
+	if itfName == "" {
+		udpMulticaster := createUDPMulticaster()
 
-	// Just keep sending out packages.
-	i := 0
-	for {
-		udpMulticaster.Write([]byte("UDP package " + strconv.Itoa(i)))
-		ipMulticaster.Write([]byte("IP package " + strconv.Itoa(i)))
+		// Just keep sending out packages.
+		i := 0
+		for {
+			udpMulticaster.Write([]byte("UDP package " + strconv.Itoa(i)))
 
-		time.Sleep(1 * time.Second)
-		i++
+			time.Sleep(1 * time.Second)
+			i++
+		}
+	} else {
+		ipMulticaster := createIPMulticaster(itfName)
+		defer ipMulticaster.Close()
+
+		// Just keep sending out packages.
+		i := 0
+		for {
+			ipMulticaster.Write([]byte("IP package " + strconv.Itoa(i)))
+
+			time.Sleep(1 * time.Second)
+			i++
+		}
 	}
 }
 
